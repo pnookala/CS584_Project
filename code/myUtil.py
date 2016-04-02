@@ -2,6 +2,41 @@ import sys, getopt, ntpath, os
 import numpy as np
 import math
 
+dataType = np.float64
+
+def read_and_parse(filepath, header=False, delimiter=','):
+
+    content = np.genfromtxt(filepath, dtype=None, delimiter=delimiter, skip_header=header)
+
+    N = content.shape[0];
+    class_column = len(content[0]) - 1
+    data_columns = [i for i in range(class_column)]
+
+    try:
+        class_type = content[0].dtype[class_column]
+    except:
+        class_type = content[0].dtype
+
+    data = np.ndarray((N, class_column), dtype=dataType)
+    output = np.ndarray((N, 1), dtype=class_type)
+
+    i = 0
+    for d in content:
+        for j in data_columns:
+            data[i,j] = d[j]
+        output[i] = d[class_column]
+        i+=1
+
+    return data, output
+
+def get_name_without_ext(name):
+    try:
+        i = name.rindex('.')
+    except ValueError:
+        i = len(name)
+    return name[0:i]
+
+
 
 def print_confusion_matrix(mat, labels, number_width=4, number_precision=0, title=''):
     row_title = "predicted "
@@ -116,22 +151,6 @@ def formatAsString(x):
     return "({0} '{1}')".format(type(x), str(x))
 
 
-# def myshow(array, name='', maxlines=5):
-#     prefix = ""
-#     if name != '':
-#         fLine = name + " = "
-#         print(fLine, end='')
-#         prefix = " " * max(len(fLine), 8)
-#
-#     print(str(array.shape) + "    [dtype: " + str(array.dtype) + "]")
-#     l = 0;
-#     for line in str(array).split('\n'):
-#         print(prefix + line)
-#         l = l + 1
-#         if l > maxlines:
-#             print(prefix + " ...")
-#             break
-
 
 def myshow(array, name='', maxlines=5):
     fLine = "'{:s}' ".format(name) if name != '' else ''
@@ -146,14 +165,24 @@ def myshow(array, name='', maxlines=5):
         prefix = " " * 6
         for line in str(array).split('\n'):
             print(prefix + line)
-            l = l + 1
             if l > maxlines:
                 print(prefix + " ...")
                 break
+            l += 1
+
+        try:
+            print(prefix + "Sum:     " + str( np.sum(array)))
+            print(prefix + "Min/Max: " + str( np.min(array)) + "/" + str(np.max(array)))
+            print(prefix + "Average: " + str( np.average(array)))
+        except:
+            ''
+            # else not a numeric range, skip
+
     else:
         print(repr(array))
 
-    print()
+    print(flush=True)
+
 
 def memory():
     import os
