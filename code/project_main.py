@@ -59,12 +59,20 @@ def main(argv):
     # myshow(output, "output")
 
     #### Process data ####
-    old_data = data
+    old_data = data.copy()
+
     if manually_zero:
-        data = clear_data_random(data, row_rate=0.4, col_rate=2, seed=0)
+        data = clear_data_random(data, row_rate=.75, col_rate=2, seed=0)
 
     myshow(data, "data", maxlines=15)
     myshow(output, "output")
+
+    processor = Imputation();
+    processor.estimate_values(data)
+
+    myshow(data, "imputed data", maxlines=15)
+    myshow(data - old_data, "difference", maxlines=15)
+
     print("Done, exiting")
 
 
