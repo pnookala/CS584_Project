@@ -1,29 +1,24 @@
 #!/usr/bin/python
 
-import sys, getopt, ntpath, os
-import math
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-import sklearn.preprocessing as skp
-from sklearn import linear_model
 from myUtil import *
+from imputation import *
 
 debug = False
-dataType = np.float64
-
 
 def main(argv):
-    #### Input Parsing ####
+
+    #### Setup ####
 
     # Default options, use the command-line parameters to override
     filePath = 'data/iris.data'
+    outputDir = 'output'
 
-    datadelimiter = ','
+    delimiter = ','
     # has_header = True
     has_header = False
 
-    outputDir = 'output'
+    manually_zero = True
+
 
     def get_help(argv):
         print(argv[0] + ' -i <input_file> [-s]')
@@ -47,54 +42,39 @@ def main(argv):
 
 
     #### Environment Setup ####
-    fileName = ntpath.basename(filePath)
+    # fileName = ntpath.basename(filePath)
+    # outputFileBase = get_name_without_ext(fileName)
+    # outputFileName = outputDir + '/' + outputFileBase + '_output'
+    # if not os.path.exists(outputDir):
+    #     os.makedirs(outputDir)
 
-    try:
-        i = fileName.rindex('.')
-    except ValueError:
-        i = len(fileName)
 
-    outputFileBase = fileName[0:i]
-    outputFileName = outputDir + '/' + outputFileBase + '_output'
-
-    if not os.path.exists(outputDir):
-        os.makedirs(outputDir)
-
+    #### Read/Parse Data ####
     print()
     print('Reading from "' + filePath + '"')
     print()
 
-    #### Read/Parse Data ####
-    content = np.genfromtxt(filePath,dtype=None,  delimiter=datadelimiter, skip_header=has_header)
-    if debug:
-        myshow(content, "content")
-        print()
+    data, output = read_and_parse(filePath, header=has_header, delimiter=delimiter)
+    # myshow(data, "data", maxlines=15)
+    # myshow(output, "output")
 
+    #### Process data ####
+    old_data = data.copy()
 
-    N = content.shape[0];
-    class_column = len(content[0]) - 1
-    data_columns = [i for i in range(class_column)]
+    if manually_zero:
+        data = clear_data_random(data, row_rate=.75, col_rate=2, seed=0)
 
-    try:
-        class_type = content[0].dtype[class_column]
-    except:
-        class_type = content[0].dtype
+    myshow(data, "data", maxlines=15)
+    myshow(output, "output")
 
-    data = np.ndarray((N, class_column), dtype=dataType)
-    classes = np.ndarray((N, 1), dtype=class_type)
+    processor = Imputation();
+    processor.estimate_values(data)
 
-
-    i = 0
-    for d in content:
-        for j in data_columns:
-            data[i,j] = d[j]
-        classes[i] = d[class_column]
-        i+=1
-
-    myshow(data, "data")
-    myshow(classes, "classes")
+    myshow(data, "imputed data", maxlines=15)
+    myshow(data - old_data, "difference", maxlines=15)
 
     print("Done, exiting")
+
 
 if __name__ == "__main__":
     main(sys.argv)
