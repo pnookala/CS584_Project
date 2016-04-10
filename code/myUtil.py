@@ -4,30 +4,42 @@ import math
 
 dataType = np.float64
 
-def read_and_parse(filepath, header=False, delimiter=','):
+def read_and_parse(filepath, class_column = None, header=False, delimiter=','):
 
     content = np.genfromtxt(filepath, dtype=None, delimiter=delimiter, skip_header=header)
 
-    N = content.shape[0];
-    class_column = len(content[0]) - 1
-    data_columns = [i for i in range(class_column)]
+    N = content.shape[0]
+    M = len(content[0]) - 1
+    if class_column==None:
+        class_column = M
+
+    data_columns = [i for i in range(M+1)]
+    data_columns.remove(class_column)
 
     try:
         class_type = content[0].dtype[class_column]
     except:
         class_type = content[0].dtype
 
-    data = np.ndarray((N, class_column), dtype=dataType)
+    data = np.ndarray((N, M), dtype=dataType)
     output = np.ndarray((N, 1), dtype=class_type)
 
     i = 0
     for d in content:
+        k = 0
         for j in data_columns:
-            data[i,j] = d[j]
+            try:
+                v = float(d[j])
+            except ValueError:
+                v = math.nan
+            data[i,k] = v
+            k+=1
         output[i] = d[class_column]
         i+=1
 
-    return data, output
+    classes = np.unique(output)
+    class_indices = np.argwhere(output==classes)[:,1] # Create indices to the "classes" array for each row
+    return data, output, class_indices, classes
 
 def get_name_without_ext(name):
     try:
@@ -121,6 +133,35 @@ def print_confusion_matrix(mat, labels, number_width=4, number_precision=0, titl
 
     # Done!
     print()
+
+
+def CalculateStatistics(conf_matrix):
+    # print_confusion_matrix(conf_matrix, ["class " + str(x) for x in range(conf_matrix.shape[0])])
+
+    num_classes = conf_matrix.shape[0]
+    accuracy = np.sum(conf_matrix[range(num_classes), range(num_classes)]) / np.sum(conf_matrix)
+
+    recalls = []
+    for i in range(num_classes):
+        s = np.sum(conf_matrix[range(num_classes), i])
+        if s > 0:
+            recalls.append(conf_matrix[i, i] / s)
+        else:
+            recalls.append(0)
+    recall = np.average(recalls)
+
+    precisions = []
+    for i in range(num_classes):
+        s = np.sum(conf_matrix[i, range(num_classes)])
+        if s > 0:
+            precisions.append(conf_matrix[i, i] / s)
+        else:
+            precisions.append(0)
+    precision = np.average(precisions)
+
+    f_measure = (2 * precision * recall) / (precision + recall)
+
+    return accuracy, recall, precision, f_measure
 
 
 # Just writes a few stats about the error to disk
