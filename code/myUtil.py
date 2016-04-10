@@ -4,26 +4,36 @@ import math
 
 dataType = np.float64
 
-def read_and_parse(filepath, header=False, delimiter=','):
+def read_and_parse(filepath, class_column = None, header=False, delimiter=','):
 
     content = np.genfromtxt(filepath, dtype=None, delimiter=delimiter, skip_header=header)
 
-    N = content.shape[0];
-    class_column = len(content[0]) - 1
-    data_columns = [i for i in range(class_column)]
+    N = content.shape[0]
+    M = len(content[0]) - 1
+    if class_column==None:
+        class_column = M
+
+    data_columns = [i for i in range(M+1)]
+    data_columns.remove(class_column)
 
     try:
         class_type = content[0].dtype[class_column]
     except:
         class_type = content[0].dtype
 
-    data = np.ndarray((N, class_column), dtype=dataType)
+    data = np.ndarray((N, M), dtype=dataType)
     output = np.ndarray((N, 1), dtype=class_type)
 
     i = 0
     for d in content:
+        k = 0
         for j in data_columns:
-            data[i,j] = d[j]
+            try:
+                v = float(d[j])
+            except ValueError:
+                v = math.nan
+            data[i,k] = v
+            k+=1
         output[i] = d[class_column]
         i+=1
 
