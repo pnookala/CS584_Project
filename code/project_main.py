@@ -25,7 +25,7 @@ def main(argv):
     row_random_rate = [0]
     col_random_rate = [0]
     row_random_rate = np.arange(0, 1.0001, 0.05)
-    col_random_rate = np.arange(0, 60, 1)
+    col_random_rate = np.arange(0, 2, 1)
     r_seed = 0
 
     def get_help(argv):
@@ -216,8 +216,6 @@ def save_errors(accuracy, recall, precision, f_measure, parameters):
 
 
 def print_statistics_plot(statistics, fileName):
-    myshow(statistics, "Statistics")
-
     row_vals = []
     col_vals = []
     for row in statistics:
@@ -229,22 +227,28 @@ def print_statistics_plot(statistics, fileName):
 
     myshow(row_vals)
     myshow(col_vals)
-    #  statistics[:,0]
     data = np.zeros((len(row_vals), len(col_vals), 4), dtype=np.float64)
     for row in statistics:
         r = np.where(row_vals == row[0])
         c = np.where(col_vals == row[1])
         data[r, c, 0:4] = row[2:6]
 
-    myshow(data)
 
-    # fig, axes = plt.subplots(3, 6, figsize=(12, 6), subplot_kw={'xticks': [], 'yticks': []})
     fig, axes = plt.subplots(2, 2, figsize={16, 9}, subplot_kw={'xticks': [], 'yticks': []})
-    # fig.subplots_adjust(hspace=0.3, wspace=0.05)
-
     for ax, indices, measurement in zip(axes.flat, range(0, 4, 1), ["Accuracy", "Precision", "Recall", "F-Measure"]):
         ax.imshow(1 - data[:, :, indices], cmap=plt.cm.jet, vmin=0., vmax=1.)
         ax.set_title(measurement)
+
+    col_mult = math.ceil(len(col_vals)/10)
+    col_indices = np.arange(start=0, stop=len(col_vals), step=col_mult )
+
+    row_mult = math.ceil(len(row_vals)/11)
+    row_indices = np.arange(start=0, stop=len(row_vals), step=row_mult)
+    myshow(row_indices)
+
+    plt.setp(axes, xticks=col_indices, xticklabels=col_vals[col_indices], xlabel="Column Deletion Rate",
+                   yticks=row_indices, yticklabels=row_vals[row_indices], ylabel="Row Affected Rate")
+    plt.tight_layout()
 
     # plt.show()
     plt.savefig(os.path.join(outputDir, "Estimation_statistics_plot-{0}.png".format(fileName)), bbox_inches='tight')
