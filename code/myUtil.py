@@ -27,7 +27,9 @@ def read_and_parse(filepath, header=False, delimiter=','):
         output[i] = d[class_column]
         i+=1
 
-    return data, output
+    classes = np.unique(output)
+    class_indices = np.argwhere(output==classes)[:,1] # Create indices to the "classes" array for each row
+    return data, output, class_indices, classes
 
 def get_name_without_ext(name):
     try:
@@ -121,6 +123,35 @@ def print_confusion_matrix(mat, labels, number_width=4, number_precision=0, titl
 
     # Done!
     print()
+
+
+def CalculateStatistics(conf_matrix):
+    # print_confusion_matrix(conf_matrix, ["class " + str(x) for x in range(conf_matrix.shape[0])])
+
+    num_classes = conf_matrix.shape[0]
+    accuracy = np.sum(conf_matrix[range(num_classes), range(num_classes)]) / np.sum(conf_matrix)
+
+    recalls = []
+    for i in range(num_classes):
+        s = np.sum(conf_matrix[range(num_classes), i])
+        if s > 0:
+            recalls.append(conf_matrix[i, i] / s)
+        else:
+            recalls.append(0)
+    recall = np.average(recalls)
+
+    precisions = []
+    for i in range(num_classes):
+        s = np.sum(conf_matrix[i, range(num_classes)])
+        if s > 0:
+            precisions.append(conf_matrix[i, i] / s)
+        else:
+            precisions.append(0)
+    precision = np.average(precisions)
+
+    f_measure = (2 * precision * recall) / (precision + recall)
+
+    return accuracy, recall, precision, f_measure
 
 
 # Just writes a few stats about the error to disk
