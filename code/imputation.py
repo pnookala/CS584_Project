@@ -8,7 +8,7 @@ from sklearn import linear_model
 from myUtil import *
 from knnAlgorithm import *
 
-debug = True
+debug = False
 
 
 # debug = False
@@ -22,7 +22,7 @@ debug = True
 # seed        - Used to control the randomization, used for debugging
 def clear_data_random(data, row_rate=1., col_rate=1, seed=None):
     if (row_rate < 0) | (row_rate > 1):
-        raise "row_rate of " + str(row_rate) + " is invalid. Valid range is 0 - 1 inclusive"
+        raise ValueError("row_rate of " + str(row_rate) + " is invalid. Valid range is 0 - 1 inclusive")
 
     if len(data.shape) != 2:
         raise "Can only clear data in a 2-D array"
@@ -44,7 +44,7 @@ def clear_data_random(data, row_rate=1., col_rate=1, seed=None):
         # Clear out up to <col_rate> values from each row
         for j in range(col_rate):
             col = np.random.randint(0, N)
-            data[indices[i], col] = math.nan
+            data[indices[i], col%M] = math.nan
 
     return data
 
