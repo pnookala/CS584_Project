@@ -44,7 +44,7 @@ def clear_data_random(data, row_rate=1., col_rate=1, seed=None):
         # Clear out up to <col_rate> values from each row
         for j in range(col_rate):
             col = np.random.randint(0, N)
-            data[indices[i], col%M] = math.nan
+            data[indices[i], col] = math.nan
 
     return data
 
