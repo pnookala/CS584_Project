@@ -60,3 +60,7 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+*.png
+code/output/results.csv
+code/output/results.xlsx
+.idea/workspace.xml
