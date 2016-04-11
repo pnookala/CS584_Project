@@ -5,12 +5,16 @@ from imputation import *
 from sklearn import svm
 import itertools
 import re
+from knnAlgorithm import *
+from pylab import *
+from numpy import *
 
 debug = True
 outputDir = 'output'
 
 
 def main(argv):
+
     #### Setup ####
 
     # Default options for debugging, use the command-line parameters to override
@@ -113,7 +117,9 @@ def main(argv):
     print()
 
     data, output, class_indices, classes = read_and_parse(filePath, class_column, header=has_header,
-                                                          delimiter=delimiter)
+                                                         delimiter=delimiter)
+
+    # classes = np.unique(output, return_inverse=True)
 
     myshow(data, "data", maxlines=15)
     myshow(output, "output")
@@ -151,7 +157,7 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
     #     myshow(class_indices, "class_indices")
 
     processor = Imputation();
-    processor.estimate_values(_data)
+    processor.estimate_values(_data, class_indices)
 
     # myshow(data, "imputed data", maxlines=15)
     # myshow(data - old_data, "difference", maxlines=15)
