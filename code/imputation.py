@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import sklearn.preprocessing as skp
 from sklearn import linear_model
 from myUtil import *
+from knnAlgorithm import *
 
 debug = True
 
@@ -58,7 +59,7 @@ class Imputation:
         self.alpha = 1
         ''
 
-    def estimate_values(self, data):
+    def estimate_values(self, data, output):
         # First find parameters
         M, N = data.shape
         instance_rate = np.zeros((M), dtype=self.dtype)  # 1/R_i
@@ -111,6 +112,10 @@ class Imputation:
             myshow(sorted_indices, "sorted_indices")
             myshow(significance, "significance", maxlines=20)
             myshow(missing_indices, "missing_indices")
+
+        knnClassification(data, output)
+        imputedData = knnImputation(data, missing_indices, sorted_indices,impact_weight)
+        knnClassification(imputedData, output)
 
         # CIMV is now equivalent to:
         #   missing_indices[sorted_indices]

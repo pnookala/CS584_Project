@@ -2,6 +2,9 @@
 
 from myUtil import *
 from imputation import *
+from knnAlgorithm import *
+from pylab import *
+from numpy import *
 
 debug = False
 
@@ -55,6 +58,7 @@ def main(argv):
     print()
 
     data, output = read_and_parse(filePath, header=has_header, delimiter=delimiter)
+    classes = np.unique(output, return_inverse=True)
     # myshow(data, "data", maxlines=15)
     # myshow(output, "output")
 
@@ -68,7 +72,7 @@ def main(argv):
     myshow(output, "output")
 
     processor = Imputation();
-    processor.estimate_values(data)
+    processor.estimate_values(data, classes[1])
 
     myshow(data, "imputed data", maxlines=15)
     myshow(data - old_data, "difference", maxlines=15)
