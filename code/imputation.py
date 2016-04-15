@@ -112,10 +112,10 @@ class Imputation:
             myshow(sorted_indices, "sorted_indices")
             myshow(significance, "significance", maxlines=20)
             myshow(missing_indices, "missing_indices")
-
-        knnClassification(data, output)
-        imputedData = knnImputation(data, missing_indices, sorted_indices,impact_weight)
-        knnClassification(imputedData, output)
+        n_classes = len(np.unique(output))
+        knnClassification(data, output, 'Before')
+        imputedData = knnImputation(data, missing_indices, sorted_indices,impact_weight, n_classes )
+        knnClassification(imputedData, output, 'After')
 
         # CIMV is now equivalent to:
         #   missing_indices[sorted_indices]
