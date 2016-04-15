@@ -35,39 +35,43 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
             for i in range(len(missing_indices)):
                 CMIV_i = missing_indices[sorted_indices[i]]
                 datapoint = data[CMIV_i[0]]
-                neighbors, distances = getNearestNeighbors(data, datapoint, int(len(data)))
-                # print(neighbors)
-                # print(distances)
 
-                weightedSum = 0.0
-                for j in range(len(distances)):
-                    weightedSum += impact_weight[j] * distances[j]
-                weightedMean = weightedSum / len(distances)
+                nearest_n_neighbors = int(len(data) / n_classes)
+                # nearest_n_neighbors =20
+                neighbors, distances = getNearestNeighbors(data, datapoint, nearest_n_neighbors)
 
-                imputedData[CMIV_i[0], CMIV_i[1]] = weightedMean
+                neighbor_average = np.average(neighbors, axis=0)
+                imputedData[CMIV_i[0], CMIV_i[1]] = neighbor_average[CMIV_i[1]]
 
-                print("Previous Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], data[CMIV_i[0], CMIV_i[1]]))
-                print("Imputed Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], imputedData[CMIV_i[0], CMIV_i[1]]))
-                changeinValues += data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]]
+                # weightedSum = 0.0
+                # for j in range(len(distances)):
+                #     weightedSum += impact_weight[j] * distances[j]
+                # weightedMean = weightedSum / len(distances)
+                # imputedData[CMIV_i[0], CMIV_i[1]] = weightedMean
+
+                # print("Previous Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], data[CMIV_i[0], CMIV_i[1]]))
+                # print("Imputed Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], imputedData[CMIV_i[0], CMIV_i[1]]))
+
+                print("    Data[{0:3d}, {1:3d}]: {2:3.4f} => {3:3.4f}".format(
+                    CMIV_i[0],
+                    CMIV_i[1],
+                    data[CMIV_i[0], CMIV_i[1]],
+                    imputedData[CMIV_i[0], CMIV_i[1]]
+                ))
+                changeinValues += abs(data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]])
                 print('', end='', flush=True)
 
             # print(imputedData)
             meanChange = changeinValues / len(missing_indices)
             print("Mean change in filled in values : ", meanChange)
 
-            if oldMeanChange == 0:
-                meanDiff = meanChange
-            else:
-                meanDiff = oldMeanChange - meanChange
-            oldMeanChange = meanChange
-
             # Copy new data for next iteration
             data = imputedData.copy()
-            if meanDiff <= 0.00001:
+            if abs(oldMeanChange - meanChange) <= 0.000001:
                 break;
+            oldMeanChange = meanChange
 
-
-        print('Total number of iterations to convergence : ', k)
+        print('Total number of iterations to convergence : ' + str(k), flush=True)
         return data
     else:
         return originalData
@@ -118,7 +122,7 @@ def getAccuracy(testSet, predictions):
 
 def knnClassification(data, output, state):
     class_values = np.unique(output)
-    n_neighbors = len(data)/len(class_values)
+    n_neighbors = len(data) / len(class_values)
 
     # data = datasets.load_iris()
     X = data[:, :2]  # we only take the first two features. We could
@@ -142,7 +146,7 @@ def knnClassification(data, output, state):
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                          np.arange(y_min, y_max, h))
 
-    with warnings.catch_warnings(): # https://docs.python.org/2/library/warnings.html#temporarily-suppressing-warnings
+    with warnings.catch_warnings():  # https://docs.python.org/2/library/warnings.html#temporarily-suppressing-warnings
         warnings.simplefilter("ignore")
         warnings.warn("deprecated", DeprecationWarning)
         Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
