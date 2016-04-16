@@ -29,7 +29,7 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
         oldMeanChange = 0.0
         meanDiff = 0.0
         k = 0
-        while (True):
+        while k < 10:
             k += 1
             print("Iteration ", k)
             for i in range(len(missing_indices)):
@@ -40,14 +40,21 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
                 # nearest_n_neighbors =20
                 neighbors, distances = getNearestNeighbors(data, datapoint, nearest_n_neighbors)
 
-                neighbor_average = np.average(neighbors, axis=0)
-                imputedData[CMIV_i[0], CMIV_i[1]] = neighbor_average[CMIV_i[1]]
-
                 # weightedSum = 0.0
                 # for j in range(len(distances)):
                 #     weightedSum += impact_weight[j] * distances[j]
                 # weightedMean = weightedSum / len(distances)
                 # imputedData[CMIV_i[0], CMIV_i[1]] = weightedMean
+
+                # Imputed value is the weighted mean of the neighboring values weighted by the distance of the neighbors
+                distanceWeights = np.zeros(len(distances))
+                maxDistance = max(distances)
+                for j in range(len(distances)):
+                    distanceWeights[j] = (distances[j]/maxDistance)
+
+                neighbor_average = np.average(neighbors, weights=distanceWeights, axis=0)
+                # neighbor_average = np.average(neighbors, axis=0)
+                imputedData[CMIV_i[0], CMIV_i[1]] = neighbor_average[CMIV_i[1]]
 
                 # print("Previous Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], data[CMIV_i[0], CMIV_i[1]]))
                 # print("Imputed Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], imputedData[CMIV_i[0], CMIV_i[1]]))
@@ -58,7 +65,7 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
                     data[CMIV_i[0], CMIV_i[1]],
                     imputedData[CMIV_i[0], CMIV_i[1]]
                 ))
-                changeinValues += abs(data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]])
+                changeinValues += (data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]])
                 print('', end='', flush=True)
 
             # print(imputedData)
@@ -67,7 +74,9 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
 
             # Copy new data for next iteration
             data = imputedData.copy()
-            if abs(oldMeanChange - meanChange) <= 0.000001:
+            meanDiff = oldMeanChange - meanChange
+            print("Mean Difference : ", meanDiff)
+            if k > 1 and meanDiff <= 0.001:
                 break;
             oldMeanChange = meanChange
 
@@ -137,6 +146,8 @@ def knnClassification(data, output, state):
 
     # we create an instance of Neighbours Classifier and fit the data.
     clf = neighbors.KNeighborsClassifier(n_neighbors)
+
+
     clf.fit(X, y)
 
     # Plot the decision boundary. For that, we will assign a color to each
