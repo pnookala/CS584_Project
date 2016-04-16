@@ -28,10 +28,9 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
         meanChange = 0.0
         oldMeanChange = 0.0
         meanDiff = 0.0
-        k = 0
-        while (True):
-            k += 1
-            print("Iteration ", k)
+        max_iterations = 100
+        for k in range(max_iterations):
+            print("Iteration ", k, end=' ')
             for i in range(len(missing_indices)):
                 CMIV_i = missing_indices[sorted_indices[i]]
                 datapoint = data[CMIV_i[0]]
@@ -40,24 +39,22 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
                 # nearest_n_neighbors =20
                 neighbors, distances = getNearestNeighbors(data, datapoint, nearest_n_neighbors)
 
-                neighbor_average = np.average(neighbors, axis=0)
+                distanceWeights = np.ones(len(distances))
+                maxDistance = max(distances)
+                if maxDistance > 0:
+                    for j in range(len(distances)):
+                        distanceWeights[j] = 1 - (distances[j] / maxDistance)
+
+                # neighbor_average = np.average(neighbors, axis=0)
+                neighbor_average = np.average(neighbors, weights=distanceWeights, axis=0)
                 imputedData[CMIV_i[0], CMIV_i[1]] = neighbor_average[CMIV_i[1]]
 
-                # weightedSum = 0.0
-                # for j in range(len(distances)):
-                #     weightedSum += impact_weight[j] * distances[j]
-                # weightedMean = weightedSum / len(distances)
-                # imputedData[CMIV_i[0], CMIV_i[1]] = weightedMean
-
-                # print("Previous Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], data[CMIV_i[0], CMIV_i[1]]))
-                # print("Imputed Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], imputedData[CMIV_i[0], CMIV_i[1]]))
-
-                print("    Data[{0:3d}, {1:3d}]: {2:3.4f} => {3:3.4f}".format(
-                    CMIV_i[0],
-                    CMIV_i[1],
-                    data[CMIV_i[0], CMIV_i[1]],
-                    imputedData[CMIV_i[0], CMIV_i[1]]
-                ))
+                # print("    Data[{0:3d}, {1:3d}]: {2:3.4f} => {3:3.4f}".format(
+                #     CMIV_i[0],
+                #     CMIV_i[1],
+                #     data[CMIV_i[0], CMIV_i[1]],
+                #     imputedData[CMIV_i[0], CMIV_i[1]]
+                # ))
                 changeinValues += abs(data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]])
                 print('', end='', flush=True)
 
@@ -67,7 +64,7 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
 
             # Copy new data for next iteration
             data = imputedData.copy()
-            if abs(oldMeanChange - meanChange) <= 0.000001:
+            if abs(oldMeanChange - meanChange) <= 0.0001:
                 break;
             oldMeanChange = meanChange
 
@@ -126,7 +123,7 @@ def knnClassification(data, output, state):
 
     # data = datasets.load_iris()
     X = data[:, :2]  # we only take the first two features. We could
-                          # avoid this ugly slicing by using a two-dim dataset
+    # avoid this ugly slicing by using a two-dim dataset
     y = output
 
     h = .02  # step size in the mesh
@@ -143,8 +140,8 @@ def knnClassification(data, output, state):
     # point in the mesh [x_min, m_max]x[y_min, y_max].
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-                         np.arange(y_min, y_max, h))
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, (x_max - x_min) / 200),
+                         np.arange(y_min, y_max, (y_max - y_min) / 200))
 
     with warnings.catch_warnings():  # https://docs.python.org/2/library/warnings.html#temporarily-suppressing-warnings
         warnings.simplefilter("ignore")
@@ -166,4 +163,5 @@ def knnClassification(data, output, state):
     plt.title("3-Class classification")
 
     plt.savefig('output/classification_' + str(state) + '.png')
+    plt.close()
     print('', end='', flush=True)
