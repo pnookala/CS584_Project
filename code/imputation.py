@@ -59,7 +59,7 @@ class Imputation:
         self.alpha = 1
         ''
 
-    def estimate_values(self, data, output):
+    def estimate_values(self, data, output, impute_data):
         # First find parameters
         M, N = data.shape
         instance_rate = np.zeros((M), dtype=self.dtype)  # 1/R_i
@@ -112,9 +112,15 @@ class Imputation:
             myshow(sorted_indices, "sorted_indices")
             myshow(significance, "significance", maxlines=20)
             myshow(missing_indices, "missing_indices")
-        n_classes = len(np.unique(output))
+
         knnClassification(data, output, 'Before')
-        imputedData = knnImputation(data, missing_indices, sorted_indices,impact_weight, n_classes )
+
+        # Stop here if we're doing a baseline score
+        if not impute_data:
+            return data
+
+        n_classes = len(np.unique(output))
+        imputedData = knnImputation(data, missing_indices, sorted_indices, impact_weight, n_classes)
         knnClassification(imputedData, output, 'After')
 
         # CIMV is now equivalent to:
@@ -126,6 +132,8 @@ class Imputation:
         #       CMIV_i = missing_indices[sorted_indices[i]]
         #       value = data[CMIV_i[0], CMIV_i[1]]
         #       ...
+
+        return imputedData
 
     def sign(self, i, j):
         if (self.impact_weight[i] == 0) | (self.mutual_info[j] == 0):

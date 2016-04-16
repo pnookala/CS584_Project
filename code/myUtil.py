@@ -4,17 +4,24 @@ import math
 
 dataType = np.float64
 
-def read_and_parse(filepath, class_column = None, header=False, delimiter=','):
 
+def read_and_parse(filepath, class_column=None, ignored_columns=None, header=False, delimiter=','):
     content = np.genfromtxt(filepath, dtype=None, delimiter=delimiter, skip_header=header)
 
     N = content.shape[0]
     M = len(content[0]) - 1
-    if class_column==None:
+    data_columns = [i for i in range(M + 1)]
+
+    if class_column == None:
         class_column = M
 
-    data_columns = [i for i in range(M+1)]
+    if not ignored_columns is None:
+        M -= len(ignored_columns)
+
     data_columns.remove(class_column)
+    if not ignored_columns is None:
+        for c in ignored_columns:
+            data_columns.remove(c)
 
     try:
         class_type = content[0].dtype[class_column]
@@ -32,14 +39,15 @@ def read_and_parse(filepath, class_column = None, header=False, delimiter=','):
                 v = float(d[j])
             except ValueError:
                 v = math.nan
-            data[i,k] = v
-            k+=1
+            data[i, k] = v
+            k += 1
         output[i] = d[class_column]
-        i+=1
+        i += 1
 
     classes = np.unique(output)
-    class_indices = np.argwhere(output==classes)[:,1] # Create indices to the "classes" array for each row
+    class_indices = np.argwhere(output == classes)[:, 1]  # Create indices to the "classes" array for each row
     return data, output, class_indices, classes
+
 
 def get_name_without_ext(name):
     try:
@@ -47,7 +55,6 @@ def get_name_without_ext(name):
     except ValueError:
         i = len(name)
     return name[0:i]
-
 
 
 def print_confusion_matrix(mat, labels, number_width=4, number_precision=0, title=''):
@@ -173,9 +180,9 @@ def saveErrorReport(fName, line_array, header_array):
         ef.write("\n")
 
     ef.write(','.join(
-            # formatAsString(x)
-            str(x)
-            for x in line_array
+        # formatAsString(x)
+        str(x)
+        for x in line_array
     ))
     ef.write("\n")
 
@@ -190,7 +197,6 @@ def formatAsString(x):
     if (type(x) == float) | (type(x) == np.float64):
         return '{:.5f}'.format(x)
     return "({0} '{1}')".format(type(x), str(x))
-
 
 
 def myshow(array, name='', maxlines=5):
@@ -212,9 +218,9 @@ def myshow(array, name='', maxlines=5):
             l += 1
 
         try:
-            print(prefix + "Sum:     " + str( np.sum(array)))
-            print(prefix + "Min/Max: " + str( np.min(array)) + "/" + str(np.max(array)))
-            print(prefix + "Average: " + str( np.average(array)))
+            print(prefix + "Sum:     " + str(np.sum(array)))
+            print(prefix + "Min/Max: " + str(np.min(array)) + "/" + str(np.max(array)))
+            print(prefix + "Average: " + str(np.average(array)))
         except:
             ''
             # else not a numeric range, skip
