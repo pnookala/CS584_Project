@@ -20,23 +20,23 @@ def main(argv):
     impute_data = True
 
     # Default options for debugging, use the command-line parameters to override
-    # filePath = 'data/iris.data'
-    # class_column = None
+    filePath = 'data/iris.data'
+    class_column = None
 
     # filePath = 'data/soybean-large.data'
     # class_column = 0
 
     # filePath = 'data/echocardiogram_clean.data'
-    filePath = 'data/echocardiogram.data'
-    class_column = 1
-    ignored_columns = [0, 10]
+    # filePath = 'data/echocardiogram.data'
+    # class_column = 1
+    # ignored_columns = [0, 10]
 
     delimiter = ','
     has_header = False
-    # row_random_rate = [.7]
-    # col_random_rate = [2]
-    row_random_rate = [0]
-    col_random_rate = [0]
+    row_random_rate = [.7]
+    col_random_rate = [2]
+    # row_random_rate = [0]
+    # col_random_rate = [0]
     # row_random_rate = np.arange(0, 1.0001, 0.1)
     # col_random_rate = np.arange(0, 8, 1)
     r_seed = 0
@@ -200,14 +200,17 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
 
     perform_classification(_data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate)
 
-    # Plot mean change in values
-    plt.plot(meanChangeInValues, "-", linewidth=2.0)
-    plt.title("Mean Change in Values")
-    fileName = ntpath.basename(filePath)
-    plt.savefig('output/MeanChangePlot_' + fileName + '.png')
-    plt.close()
+    if impute_data:
+        # Plot mean change in values
+        plt.plot(meanChangeInValues, "-", linewidth=2.0)
+        plt.xlabel('Iterations', fontsize=12)
+        plt.ylabel('Mean change in values', fontsize=12)
+        # plt.title("Mean Change in Values")
+        fileName = ntpath.basename(filePath)
+        plt.savefig('output/MeanChangePlot_' + fileName + '.png')
+        plt.close()
 
-    print('', end='', flush=True)
+        print('', end='', flush=True)
 
 
 def perform_classification(data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate):

@@ -2,16 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list id="f78c33f1-874d-48bf-84a7-bdb0f534bae9" name="Default" comment="" />
-    <list default="true" id="b9def089-bbd1-40a3-b01c-275275716a7e" name="Initial PyCharm Project Structure" comment="Added knnImputation, need to check convergence.">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/code/output/Estimation_statistics_plot-echocardiogram.data.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/code/output/MeanChangePlot_echocardiogram.data.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/code/output/MeanChangePlotiris.data.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/code/output/meanchange.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/Estimation_statistics_plot-iris.data.png" afterPath="$PROJECT_DIR$/code/output/Estimation_statistics_plot-iris.data.png" />
+    <list default="true" id="b9def089-bbd1-40a3-b01c-275275716a7e" name="Initial PyCharm Project Structure" comment="Added mean change plot.">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/code/output/MeanChangePlot_iris.data.png" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/code/output/MeanChangePlotiris.data.png" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/MeanChangePlot_echocardiogram.data.png" afterPath="$PROJECT_DIR$/code/output/MeanChangePlot_echocardiogram.data.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/classification_After.png" afterPath="$PROJECT_DIR$/code/output/classification_After.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/classification_Before.png" afterPath="$PROJECT_DIR$/code/output/classification_Before.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/imputation.py" afterPath="$PROJECT_DIR$/code/imputation.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/knnAlgorithm.py" afterPath="$PROJECT_DIR$/code/knnAlgorithm.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/results.csv" afterPath="$PROJECT_DIR$/code/output/results.csv" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/project_main.py" afterPath="$PROJECT_DIR$/code/project_main.py" />
     </list>
@@ -61,8 +58,8 @@
       <file leaf-file-name="project_main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/code/project_main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.61567163">
-              <caret line="33" column="19" selection-start-line="33" selection-start-column="19" selection-end-line="33" selection-end-column="19" />
+            <state vertical-scroll-proportion="0.6902985">
+              <caret line="208" column="44" selection-start-line="208" selection-start-column="44" selection-end-line="208" selection-end-column="44" />
               <folding>
                 <element signature="e#19#39#0" expanded="true" />
               </folding>
@@ -458,7 +455,13 @@
       <option name="project" value="LOCAL" />
       <updated>1460837693104</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Added mean change plot.">
+      <created>1460842151372</created>
+      <option name="number" value="00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1460842151372</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TodoView">
@@ -512,7 +515,8 @@
     <MESSAGE value="Starting work on the imputation method" />
     <MESSAGE value="Added knnImputation, need to check convergence and duplicate code." />
     <MESSAGE value="Added knnImputation, need to check convergence." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added knnImputation, need to check convergence." />
+    <MESSAGE value="Added mean change plot." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added mean change plot." />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -535,7 +539,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/code/project_main.py</url>
-          <line>269</line>
+          <line>272</line>
           <option name="timeStamp" value="62" />
         </line-breakpoint>
       </breakpoints>
@@ -828,7 +832,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/code/output/MeanChangePlotiris.data.png">
+    <entry file="file://$PROJECT_DIR$/code/output/Estimation_statistics_plot-echocardiogram.data.png">
       <provider selected="true" editor-type-id="images">
         <state />
       </provider>
@@ -838,15 +842,15 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/code/output/Estimation_statistics_plot-echocardiogram.data.png">
+    <entry file="file://$PROJECT_DIR$/code/output/MeanChangePlot_iris.data.png">
       <provider selected="true" editor-type-id="images">
         <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/code/project_main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.61567163">
-          <caret line="33" column="19" selection-start-line="33" selection-start-column="19" selection-end-line="33" selection-end-column="19" />
+        <state vertical-scroll-proportion="0.6902985">
+          <caret line="208" column="44" selection-start-line="208" selection-start-column="44" selection-end-line="208" selection-end-column="44" />
           <folding>
             <element signature="e#19#39#0" expanded="true" />
           </folding>
