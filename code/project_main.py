@@ -9,7 +9,8 @@ from knnAlgorithm import *
 from pylab import *
 from numpy import *
 
-debug = True
+# debug = True
+debug = False
 outputDir = 'output'
 
 
@@ -26,10 +27,10 @@ def main(argv):
 
     delimiter = ','
     has_header = False
-    row_random_rate = [0]
-    col_random_rate = [0]
-    row_random_rate = np.arange(0, 1.0001, 0.05)
-    col_random_rate = np.arange(0, 2, 1)
+    row_random_rate = [.7]
+    col_random_rate = [2]
+    # row_random_rate = np.arange(0, 1.0001, 0.05)
+    # col_random_rate = np.arange(0, 2, 1)
     r_seed = 0
 
     def get_help(argv):
@@ -231,8 +232,8 @@ def print_statistics_plot(statistics, fileName):
     row_vals = np.unique(row_vals)
     col_vals = np.unique(col_vals)
 
-    myshow(row_vals)
-    myshow(col_vals)
+    # myshow(row_vals)
+    # myshow(col_vals)
     data = np.zeros((len(row_vals), len(col_vals), 4), dtype=np.float64)
     for row in statistics:
         r = np.where(row_vals == row[0])
@@ -250,7 +251,7 @@ def print_statistics_plot(statistics, fileName):
 
     row_mult = math.ceil(len(row_vals)/11)
     row_indices = np.arange(start=0, stop=len(row_vals), step=row_mult)
-    myshow(row_indices)
+    # myshow(row_indices)
 
     plt.setp(axes, xticks=col_indices, xticklabels=col_vals[col_indices], xlabel="Column Deletion Rate",
                    yticks=row_indices, yticklabels=row_vals[row_indices], ylabel="Row Affected Rate")

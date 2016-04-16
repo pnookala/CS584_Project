@@ -15,10 +15,11 @@ import operator
 import csv
 import random
 import math
+from myUtil import *
+import warnings
 
 
-def knnImputation(originalData, missing_indices, sorted_indices, impact_weight):
-
+def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, n_classes):
     if len(missing_indices) > 0:
         # Copy the data into another array which will contain the imputed data after each iteration.
         imputedData = originalData.copy()
@@ -28,42 +29,49 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight):
         oldMeanChange = 0.0
         meanDiff = 0.0
         k = 0
-        while(True):
+        while (True):
             k += 1
             print("Iteration ", k)
             for i in range(len(missing_indices)):
                 CMIV_i = missing_indices[sorted_indices[i]]
                 datapoint = data[CMIV_i[0]]
-                neighbors, distances = getNearestNeighbors(data,datapoint,len(data))
-                # print(neighbors)
-                # print(distances)
 
-                weightedSum = 0.0
-                for j in range(len(distances)):
-                    weightedSum += impact_weight[j] * distances[j]
-                weightedMean = weightedSum / len(distances)
-                print("Previous Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], data[CMIV_i[0], CMIV_i[1]]))
-                imputedData[CMIV_i[0], CMIV_i[1]] = weightedMean
-                print("Imputed Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], imputedData[CMIV_i[0], CMIV_i[1]]))
-                changeinValues += data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]]
+                nearest_n_neighbors = int(len(data) / n_classes)
+                # nearest_n_neighbors =20
+                neighbors, distances = getNearestNeighbors(data, datapoint, nearest_n_neighbors)
+
+                neighbor_average = np.average(neighbors, axis=0)
+                imputedData[CMIV_i[0], CMIV_i[1]] = neighbor_average[CMIV_i[1]]
+
+                # weightedSum = 0.0
+                # for j in range(len(distances)):
+                #     weightedSum += impact_weight[j] * distances[j]
+                # weightedMean = weightedSum / len(distances)
+                # imputedData[CMIV_i[0], CMIV_i[1]] = weightedMean
+
+                # print("Previous Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], data[CMIV_i[0], CMIV_i[1]]))
+                # print("Imputed Value at [{0},{1}] = {2}".format(CMIV_i[0], CMIV_i[1], imputedData[CMIV_i[0], CMIV_i[1]]))
+
+                print("    Data[{0:3d}, {1:3d}]: {2:3.4f} => {3:3.4f}".format(
+                    CMIV_i[0],
+                    CMIV_i[1],
+                    data[CMIV_i[0], CMIV_i[1]],
+                    imputedData[CMIV_i[0], CMIV_i[1]]
+                ))
+                changeinValues += abs(data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]])
+                print('', end='', flush=True)
 
             # print(imputedData)
             meanChange = changeinValues / len(missing_indices)
             print("Mean change in filled in values : ", meanChange)
 
-            if oldMeanChange == 0:
-                meanDiff = meanChange
-            else:
-                meanDiff = oldMeanChange - meanChange
-            oldMeanChange = meanChange
-
             # Copy new data for next iteration
             data = imputedData.copy()
-            if meanDiff <= 0.00001:
+            if abs(oldMeanChange - meanChange) <= 0.000001:
                 break;
+            oldMeanChange = meanChange
 
-
-        print('Total number of iterations to convergence : ', k)
+        print('Total number of iterations to convergence : ' + str(k), flush=True)
         return data
     else:
         return originalData
@@ -73,7 +81,7 @@ def loadDataset(filename, split, train=[], test=[]):
     with open(filename) as csvfile:
         lines = csv.reader(csvfile)
         dataset = list(lines)
-        for x in range(len(dataset)-1):
+        for x in range(len(dataset) - 1):
             for y in range(4):
                 dataset[x][y] = float(dataset[x][y])
             if random.random() < split:
@@ -91,7 +99,7 @@ def euclideanDistance(x1, x2, length):
 
 def getNearestNeighbors(data, datapoint, k):
     distances = []
-    length = len(datapoint) - 1
+    length = len(datapoint)
     for x in range(len(data)):
         dist = euclideanDistance(datapoint, data[x], length)
         distances.append((data[x], dist))
@@ -109,11 +117,12 @@ def getAccuracy(testSet, predictions):
     for x in range(len(testSet)):
         if testSet[x] == predictions[x]:
             correct += 1
-    return (correct/float(len(testSet))) * 100.0
+    return (correct / float(len(testSet))) * 100.0
 
 
-def knnClassification(data, output):
-    n_neighbors = len(data)
+def knnClassification(data, output, state):
+    class_values = np.unique(output)
+    n_neighbors = len(data) / len(class_values)
 
     # data = datasets.load_iris()
     X = data[:, :2]  # we only take the first two features. We could
@@ -136,8 +145,13 @@ def knnClassification(data, output):
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                          np.arange(y_min, y_max, h))
-    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
 
+    with warnings.catch_warnings():  # https://docs.python.org/2/library/warnings.html#temporarily-suppressing-warnings
+        warnings.simplefilter("ignore")
+        warnings.warn("deprecated", DeprecationWarning)
+        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+
+    # myshow(np.c_[xx.ravel(), yy.ravel()], "np.c_")
     # print("Classification Accuracy : ", getAccuracy(y, Z))
 
     # Put the result into a color plot
@@ -151,6 +165,5 @@ def knnClassification(data, output):
     plt.ylim(yy.min(), yy.max())
     plt.title("3-Class classification")
 
-    plt.show()
-
-
+    plt.savefig('output/classification_' + str(state) + '.png')
+    print('', end='', flush=True)
