@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list id="f78c33f1-874d-48bf-84a7-bdb0f534bae9" name="Default" comment="" />
-    <list default="true" id="b9def089-bbd1-40a3-b01c-275275716a7e" name="Initial PyCharm Project Structure" comment="Added mean change plot.">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/code/output/MeanChangePlot_iris.data.png" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/code/output/MeanChangePlotiris.data.png" afterPath="" />
+    <list default="true" id="b9def089-bbd1-40a3-b01c-275275716a7e" name="Initial PyCharm Project Structure" comment="Added axes titles for the plot.">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/code/output/meanchangeresults.csv" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/MeanChangePlot_echocardiogram.data.png" afterPath="$PROJECT_DIR$/code/output/MeanChangePlot_echocardiogram.data.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/MeanChangePlot_iris.data.png" afterPath="$PROJECT_DIR$/code/output/MeanChangePlot_iris.data.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/classification_After.png" afterPath="$PROJECT_DIR$/code/output/classification_After.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/code/output/classification_Before.png" afterPath="$PROJECT_DIR$/code/output/classification_Before.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
@@ -58,8 +58,8 @@
       <file leaf-file-name="project_main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/code/project_main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6902985">
-              <caret line="208" column="44" selection-start-line="208" selection-start-column="44" selection-end-line="208" selection-end-column="44" />
+            <state vertical-scroll-proportion="0.71513706">
+              <caret line="226" column="20" selection-start-line="226" selection-start-column="20" selection-end-line="226" selection-end-column="20" />
               <folding>
                 <element signature="e#19#39#0" expanded="true" />
               </folding>
@@ -461,7 +461,13 @@
       <option name="project" value="LOCAL" />
       <updated>1460842151372</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Added axes titles for the plot.">
+      <created>1460842651973</created>
+      <option name="number" value="00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1460842651973</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TodoView">
@@ -483,7 +489,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32949308" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32718894" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" show_stripe_button="true" weight="0.23847926" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" x="47" y="80" width="1633" height="936" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" show_stripe_button="true" weight="0.23847926" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" x="47" y="52" width="1633" height="936" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32949308" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -516,7 +522,8 @@
     <MESSAGE value="Added knnImputation, need to check convergence and duplicate code." />
     <MESSAGE value="Added knnImputation, need to check convergence." />
     <MESSAGE value="Added mean change plot." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added mean change plot." />
+    <MESSAGE value="Added axes titles for the plot." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added axes titles for the plot." />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -539,7 +546,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/code/project_main.py</url>
-          <line>272</line>
+          <line>292</line>
           <option name="timeStamp" value="62" />
         </line-breakpoint>
       </breakpoints>
@@ -796,14 +803,6 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/code/output/results.csv">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.1620977">
-          <caret line="65" column="50" selection-start-line="65" selection-start-column="50" selection-end-line="65" selection-end-column="50" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/code/imputation.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-7.6571426">
@@ -847,10 +846,26 @@
         <state />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/code/output/results.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.1620977">
+          <caret line="65" column="50" selection-start-line="65" selection-start-column="50" selection-end-line="65" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/code/output/meanchangeresults.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/code/project_main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6902985">
-          <caret line="208" column="44" selection-start-line="208" selection-start-column="44" selection-end-line="208" selection-end-column="44" />
+        <state vertical-scroll-proportion="0.71513706">
+          <caret line="226" column="20" selection-start-line="226" selection-start-column="20" selection-end-line="226" selection-end-column="20" />
           <folding>
             <element signature="e#19#39#0" expanded="true" />
           </folding>
