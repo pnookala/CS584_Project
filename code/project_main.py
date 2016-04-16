@@ -5,36 +5,52 @@ from imputation import *
 from sklearn import svm
 import itertools
 import re
+from knnAlgorithm import *
+from pylab import *
+from numpy import *
 
-debug = True
+# debug = True
+debug = False
 outputDir = 'output'
 
 
 def main(argv):
     #### Setup ####
+    ignored_columns = None
+    impute_data = True
 
     # Default options for debugging, use the command-line parameters to override
-    filePath = 'data/iris.data'
-    class_column = None
+    # filePath = 'data/iris.data'
+    # class_column = None
 
     # filePath = 'data/soybean-large.data'
     # class_column = 0
 
+    # filePath = 'data/echocardiogram_clean.data'
+    filePath = 'data/echocardiogram.data'
+    class_column = 1
+    ignored_columns = [0, 10]
+
     delimiter = ','
     has_header = False
+    # row_random_rate = [.7]
+    # col_random_rate = [2]
     row_random_rate = [0]
     col_random_rate = [0]
-    row_random_rate = np.arange(0, 1.0001, 0.05)
-    col_random_rate = np.arange(0, 2, 1)
+    # row_random_rate = np.arange(0, 1.0001, 0.1)
+    # col_random_rate = np.arange(0, 8, 1)
     r_seed = 0
 
     def get_help(argv):
-        print(argv[0] + ' -i <input_file> [-l <class label column>] [-s] [-r <row_rand>] [-c <col_rand>] [--seed]')
-        print('    -l  -   The column containing the class label. Defaults to the last column [0-<# columns>]')
-        print('    -s  -   skips the first line of files that have a header')
-        print('    -r  -   Parameter for clearing data, the rate at which rows should be zeroed [0-1]')
-        print('    -c  -   Parameter for clearing data, the number of columns to potentially clear [1-<#features>]')
-        print('    -seed - The random seed to use in clearing the data')
+        print(argv[
+                  0] + ' -i <input_file> [-l <class label column>] [-s] [-r <row_rand>] [-c <col_rand>] [--seed] [-I] [--skip-columns]')
+        print('    -l  -    The column containing the class label. Defaults to the last column [0-<# columns>]')
+        print('    -s  -    skips the first line of files that have a header')
+        print('    -r  -    Parameter for clearing data, the rate at which rows should be zeroed [0-1]')
+        print('    -c  -    Parameter for clearing data, the number of columns to potentially clear [1-<#features>]')
+        print("    -I  -    Don't impute values. Useful for getting the baseline accuracy of the classifier")
+        print('    --seed - The random seed to use in clearing the data')
+        print('    --skip-columns - Specify which columns should be ignored during the classification step (0-indexed)')
         print()
         print('Both the -r and -c parameters will accept a triplet of values specifying a range (as [start,end,step])')
         print('for the given parameter. The resultant range must still lie within the arguments\' bounds')
@@ -55,8 +71,20 @@ def main(argv):
             v[0] = float(arg)
             return v
 
+    def parse_seq_arg(arg, dtype):
+        if ',' in arg:
+            groups = re.findall(r"([-\d.]+)", arg)
+
+            res = [dtype(x) for x in groups]
+            myshow(res, "parse_seq_result")
+            return res
+        else:
+            res = np.ndarray((1), dtype=dtype)
+            res[0] = dtype(arg)
+            return res
+
     try:
-        opts, args = getopt.getopt(argv[1:], "hsi:r:c:l:", ["help", "ifile=", "skip-first", "seed="])
+        opts, args = getopt.getopt(argv[1:], "hsi:r:c:l:I", ["help", "ifile=", "skip-first", "seed=", "skip-columns="])
     except getopt.GetoptError:
         get_help(argv);
         sys.exit(2)
@@ -97,6 +125,16 @@ def main(argv):
             if debug:
                 print("seed: " + str(arg))
 
+        elif opt in ("-I"):
+            impute_data = False
+            if debug:
+                print("Impute: " + str(impute_data))
+
+        elif opt in ("--skip-columns"):
+            ignored_columns = parse_seq_arg(arg, int)
+            if debug:
+                print("Skipping columns: " + str(ignored_columns))
+
     #### Environment Setup ####
     fileName = ntpath.basename(filePath)
     # outputFileBase = get_name_without_ext(fileName)
@@ -112,8 +150,10 @@ def main(argv):
     print('Reading from "' + filePath + '"')
     print()
 
-    data, output, class_indices, classes = read_and_parse(filePath, class_column, header=has_header,
+    data, output, class_indices, classes = read_and_parse(filePath, class_column, ignored_columns, header=has_header,
                                                           delimiter=delimiter)
+
+    # classes = np.unique(output, return_inverse=True)
 
     myshow(data, "data", maxlines=15)
     myshow(output, "output")
@@ -126,18 +166,20 @@ def main(argv):
     #### Process data ####
     for rrand in row_random_rate:
         for crand in col_random_rate:
-            process_data(data, output, class_indices, classes, filePath, float(rrand), int(crand), r_seed, statistics)
+            process_data(data, output, class_indices, classes, filePath, float(rrand), int(crand), impute_data, r_seed,
+                         statistics)
 
     print_statistics_plot(statistics, fileName)
 
     print("Done, exiting")
 
 
-def process_data(data_source, _output, class_indices, classes, filePath, row_random_rate, col_random_rate, r_seed,
+def process_data(data_source, _output, class_indices, classes, filePath, row_random_rate, col_random_rate, impute_data,
+                 r_seed,
                  statistics):
     manually_zero = row_random_rate > 0
-    parameters = [["Input File", "Zero Data", "Row Random Rate", "Col Random Rate", "Rand Seed"],
-                  [filePath, manually_zero, row_random_rate, col_random_rate, r_seed]]
+    parameters = [["Input File", "Zero Data", "Row Random Rate", "Col Random Rate", "Rand Seed", "Impute"],
+                  [filePath, manually_zero, row_random_rate, col_random_rate, r_seed, impute_data]]
 
     _data = data_source.copy()
 
@@ -151,12 +193,44 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
     #     myshow(class_indices, "class_indices")
 
     processor = Imputation();
-    processor.estimate_values(_data)
+    _data, meanChangeInValues = processor.estimate_values(_data, class_indices, impute_data)
 
     # myshow(data, "imputed data", maxlines=15)
     # myshow(data - old_data, "difference", maxlines=15)
 
     perform_classification(_data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate)
+
+    if impute_data:
+        fileName = ntpath.basename(filePath)
+        plot_save_meanvalues(fileName, meanChangeInValues)
+
+
+def plot_save_meanvalues(fileName, meanChangeInValues):
+    # Plot mean change in values
+    plt.plot(meanChangeInValues, "-", linewidth=2.0)
+    plt.xlabel('Iterations', fontsize=12)
+    plt.ylabel('Mean change in values', fontsize=12)
+    # plt.title("Mean Change in Values")
+    plt.savefig('output/MeanChangePlot_' + fileName + '.png')
+    plt.close()
+
+    print('', end='', flush=True)
+
+    if not os.path.exists(outputDir):
+        os.makedirs(outputDir)
+
+    output_path = os.path.join(outputDir, "meanchangeresults.csv")
+    new_file = not os.path.exists(output_path)
+
+    headers = ("FileName", "Iteration", "Mean Change")
+    with open(output_path, 'a') as f:
+        if new_file:
+            f.write(','.join(itertools.chain(headers)))
+            f.write('\n')
+        for k in range(len(meanChangeInValues)):
+            f.write(','.join(str(x) for x in itertools.chain((fileName, k, meanChangeInValues[k]))))
+            f.write('\n')
+        f.flush()
 
 
 def perform_classification(data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate):
@@ -225,29 +299,28 @@ def print_statistics_plot(statistics, fileName):
     row_vals = np.unique(row_vals)
     col_vals = np.unique(col_vals)
 
-    myshow(row_vals)
-    myshow(col_vals)
+    # myshow(row_vals)
+    # myshow(col_vals)
     data = np.zeros((len(row_vals), len(col_vals), 4), dtype=np.float64)
     for row in statistics:
         r = np.where(row_vals == row[0])
         c = np.where(col_vals == row[1])
         data[r, c, 0:4] = row[2:6]
 
-
     fig, axes = plt.subplots(2, 2, figsize={16, 9}, subplot_kw={'xticks': [], 'yticks': []})
     for ax, indices, measurement in zip(axes.flat, range(0, 4, 1), ["Accuracy", "Precision", "Recall", "F-Measure"]):
         ax.imshow(1 - data[:, :, indices], cmap=plt.cm.jet, vmin=0., vmax=1.)
         ax.set_title(measurement)
 
-    col_mult = math.ceil(len(col_vals)/10)
-    col_indices = np.arange(start=0, stop=len(col_vals), step=col_mult )
+    col_mult = math.ceil(len(col_vals) / 10)
+    col_indices = np.arange(start=0, stop=len(col_vals), step=col_mult)
 
-    row_mult = math.ceil(len(row_vals)/11)
+    row_mult = math.ceil(len(row_vals) / 11)
     row_indices = np.arange(start=0, stop=len(row_vals), step=row_mult)
-    myshow(row_indices)
+    # myshow(row_indices)
 
     plt.setp(axes, xticks=col_indices, xticklabels=col_vals[col_indices], xlabel="Column Deletion Rate",
-                   yticks=row_indices, yticklabels=row_vals[row_indices], ylabel="Row Affected Rate")
+             yticks=row_indices, yticklabels=row_vals[row_indices], ylabel="Row Affected Rate")
     plt.tight_layout()
 
     # plt.show()
