@@ -20,20 +20,15 @@ import warnings
 
 
 def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, n_classes):
+    finalMeanValues = []
     if len(missing_indices) > 0:
         # Copy the data into another array which will contain the imputed data after each iteration.
         imputedData = originalData.copy()
         data = originalData.copy()
         changeinValues = 0.0
-        meanChange = 0.0
         oldMeanChange = 0.0
-        meanDiff = 0.0
 
         k = 0
-        while k < 10:
-            k += 1
-            print("Iteration ", k)
-
         max_iterations = 100
         for k in range(max_iterations):
             print("Iteration ", k, end=' ')
@@ -44,12 +39,6 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
                 nearest_n_neighbors = int(len(data) / n_classes)
                 # nearest_n_neighbors =20
                 neighbors, distances = getNearestNeighbors(data, datapoint, nearest_n_neighbors)
-
-                # weightedSum = 0.0
-                # for j in range(len(distances)):
-                #     weightedSum += impact_weight[j] * distances[j]
-                # weightedMean = weightedSum / len(distances)
-                # imputedData[CMIV_i[0], CMIV_i[1]] = weightedMean
 
                 # Imputed value is the weighted mean of the neighboring values weighted by the distance of the neighbors
                 distanceWeights = np.ones(len(distances))
@@ -77,16 +66,18 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
 
             # Copy new data for next iteration
             data = imputedData.copy()
-            meanDiff = oldMeanChange - meanChange
+            meanDiff = abs(oldMeanChange - meanChange)
             print("Mean Difference : ", meanDiff)
+            finalMeanValues.insert(k, meanDiff)
             if k > 1 and meanDiff <= 0.001:
                 break;
             oldMeanChange = meanChange
 
         print('Total number of iterations to convergence : ' + str(k), flush=True)
-        return data
+
+        return data, finalMeanValues
     else:
-        return originalData
+        return originalData, finalMeanValues
 
 
 def loadDataset(filename, split, train=[], test=[]):

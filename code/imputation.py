@@ -120,7 +120,7 @@ class Imputation:
             return data
 
         n_classes = len(np.unique(output))
-        imputedData = knnImputation(data, missing_indices, sorted_indices, impact_weight, n_classes)
+        imputedData, meanChangeInValues = knnImputation(data, missing_indices, sorted_indices, impact_weight, n_classes)
         knnClassification(imputedData, output, 'After')
 
         # CIMV is now equivalent to:
@@ -133,7 +133,7 @@ class Imputation:
         #       value = data[CMIV_i[0], CMIV_i[1]]
         #       ...
 
-        return imputedData
+        return imputedData, meanChangeInValues
 
     def sign(self, i, j):
         if (self.impact_weight[i] == 0) | (self.mutual_info[j] == 0):

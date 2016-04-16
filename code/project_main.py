@@ -33,6 +33,8 @@ def main(argv):
 
     delimiter = ','
     has_header = False
+    # row_random_rate = [.7]
+    # col_random_rate = [2]
     row_random_rate = [0]
     col_random_rate = [0]
     # row_random_rate = np.arange(0, 1.0001, 0.1)
@@ -191,12 +193,21 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
     #     myshow(class_indices, "class_indices")
 
     processor = Imputation();
-    _data = processor.estimate_values(_data, class_indices, impute_data)
+    _data, meanChangeInValues = processor.estimate_values(_data, class_indices, impute_data)
 
     # myshow(data, "imputed data", maxlines=15)
     # myshow(data - old_data, "difference", maxlines=15)
 
     perform_classification(_data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate)
+
+    # Plot mean change in values
+    plt.plot(meanChangeInValues, "-", linewidth=2.0)
+    plt.title("Mean Change in Values")
+    fileName = ntpath.basename(filePath)
+    plt.savefig('output/MeanChangePlot_' + fileName + '.png')
+    plt.close()
+
+    print('', end='', flush=True)
 
 
 def perform_classification(data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate):
