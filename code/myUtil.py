@@ -36,7 +36,12 @@ def read_and_parse(filepath, class_column=None, ignored_columns=None, header=Fal
         k = 0
         for j in data_columns:
             try:
-                v = float(d[j])
+                if str(d[j]) == "b'y'":
+                    v = 1
+                elif str(d[j]) == "b'n'":
+                    v = 0
+                else:
+                    v = float(d[j])
             except ValueError:
                 v = math.nan
             data[i, k] = v

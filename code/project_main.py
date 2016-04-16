@@ -17,7 +17,8 @@ outputDir = 'output'
 def main(argv):
     #### Setup ####
     ignored_columns = None
-    impute_data = True
+    # impute_data = True
+    impute_data = False
 
     # Default options for debugging, use the command-line parameters to override
     # filePath = 'data/iris.data'
@@ -26,10 +27,12 @@ def main(argv):
     # filePath = 'data/soybean-large.data'
     # class_column = 0
 
-    # filePath = 'data/echocardiogram_clean.data'
-    filePath = 'data/echocardiogram.data'
-    class_column = 1
-    ignored_columns = [0, 10]
+    # filePath = 'data/echocardiogram.data'
+    # class_column = 1
+    # ignored_columns = [0, 10]
+
+    filePath = 'data/house-votes-84.data'
+    class_column = 0
 
     delimiter = ','
     has_header = False
