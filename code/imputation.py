@@ -1,17 +1,8 @@
-import sys, getopt, ntpath, os
-import math
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-import sklearn.preprocessing as skp
-from sklearn import linear_model
-from myUtil import *
 from knnAlgorithm import *
 
+# debug = True
 debug = False
 
-
-# debug = False
 
 # clear_data_random is used to "manually" delete data in the target array.
 # This is done for testing purposes so that a consistent test can be performed on the resulting data.
@@ -105,9 +96,7 @@ class Imputation:
         if use_sign:
             sorted_indices = np.argsort(significance)
         else:
-            sorted_indices = []
-            for count in range(len(significance)):
-                sorted_indices.append(count)
+            sorted_indices = list(range(len(significance)))
 
         if debug:
             myshow(average, "Average")
