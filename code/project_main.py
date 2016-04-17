@@ -8,6 +8,7 @@ import re
 from knnAlgorithm import *
 from pylab import *
 from numpy import *
+from sklearn.preprocessing import Imputer
 
 # debug = True
 debug = False
@@ -18,11 +19,16 @@ def main(argv):
     #### Setup ####
     ignored_columns = None
     # impute_data = True
-    impute_data = False
+    impute_data = True
+    # Use ordering of imputed values
+    use_sign = False
 
     # Default options for debugging, use the command-line parameters to override
-    # filePath = 'data/iris.data'
-    # class_column = None
+    filePath = 'data/iris.data'
+    class_column = None
+
+    # filePath = 'data/hepatitis.data'
+    # class_column = 0
 
     # filePath = 'data/soybean-large.data'
     # class_column = 0
@@ -31,15 +37,19 @@ def main(argv):
     # class_column = 1
     # ignored_columns = [0, 10]
 
-    filePath = 'data/house-votes-84.data'
-    class_column = 0
+    # filePath = 'data/house-votes-84.data'
+    # class_column = 0
+
+    # filePath = 'data/water-treatment.data'
+    # ignored_columns = [0]
+    # class_column = None
 
     delimiter = ','
     has_header = False
-    # row_random_rate = [.7]
-    # col_random_rate = [2]
-    row_random_rate = [0]
-    col_random_rate = [0]
+    row_random_rate = [.7]
+    col_random_rate = [2]
+    # row_random_rate = [0]
+    # col_random_rate = [0]
     # row_random_rate = np.arange(0, 1.0001, 0.1)
     # col_random_rate = np.arange(0, 8, 1)
     r_seed = 0
@@ -170,7 +180,7 @@ def main(argv):
     for rrand in row_random_rate:
         for crand in col_random_rate:
             process_data(data, output, class_indices, classes, filePath, float(rrand), int(crand), impute_data, r_seed,
-                         statistics)
+                         statistics, use_sign)
 
     print_statistics_plot(statistics, fileName)
 
@@ -179,7 +189,7 @@ def main(argv):
 
 def process_data(data_source, _output, class_indices, classes, filePath, row_random_rate, col_random_rate, impute_data,
                  r_seed,
-                 statistics):
+                 statistics, use_sign):
     manually_zero = row_random_rate > 0
     parameters = [["Input File", "Zero Data", "Row Random Rate", "Col Random Rate", "Rand Seed", "Impute"],
                   [filePath, manually_zero, row_random_rate, col_random_rate, r_seed, impute_data]]
@@ -195,8 +205,12 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
     #     myshow(classes, "classes")
     #     myshow(class_indices, "class_indices")
 
+    print("With Mean Imputation : ")
+    perform_classification_with_mean_imputation(_data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate)
+
     processor = Imputation();
-    _data, meanChangeInValues = processor.estimate_values(_data, class_indices, impute_data)
+    print("With Knn Imputation : ")
+    _data, meanChangeInValues = processor.estimate_values(_data, class_indices, impute_data, use_sign)
 
     # myshow(data, "imputed data", maxlines=15)
     # myshow(data - old_data, "difference", maxlines=15)
@@ -246,6 +260,27 @@ def perform_classification(data, classes, class_indices, parameters, statistics,
     estimates = np.zeros(class_indices.shape, dtype=class_indices.dtype)
     for i in range(len(class_indices)):
         estimates[i] = clf.predict(np.reshape(data[i, :], (1, -1)))
+        conf_mat[estimates[i], class_indices[i]] += 1
+
+    # myshow(estimates, "estimates")
+    analyze_errors(conf_mat, classes, parameters, statistics, row_random_rate, col_random_rate)
+
+
+def perform_classification_with_mean_imputation(data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate):
+    imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+    imp.fit(data)
+    Imputer(axis=0, copy=True, missing_values='NaN', strategy='mean', verbose=0)
+    data_imputed = imp.transform(data)
+
+    clf = svm.SVC()
+    clf.fit(data_imputed, class_indices)
+    print(clf._get_coef())
+
+    # rows are actual, columns are predicted
+    conf_mat = np.zeros((len(classes), len(classes)), dtype=np.int64)
+    estimates = np.zeros(class_indices.shape, dtype=class_indices.dtype)
+    for i in range(len(class_indices)):
+        estimates[i] = clf.predict(np.reshape(data_imputed[i, :], (1, -1)))
         conf_mat[estimates[i], class_indices[i]] += 1
 
     # myshow(estimates, "estimates")
