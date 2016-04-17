@@ -33,8 +33,7 @@ def main(argv):
     # impute_data = False
     # use_sign = False
 
-    # filePath = 'data/iris.data'
-    # class_column = None
+    filePath = 'data/iris.data'
 
     # filePath = 'data/hepatitis.data'
     # class_column = 0
@@ -46,8 +45,8 @@ def main(argv):
     # class_column = 1
     # ignored_columns = [0, 10]
 
-    # filePath = 'data/house-votes-84.data'
-    # class_column = 0
+    filePath = 'data/house-votes-84.data'
+    class_column = 0
 
     # filePath = 'data/water-treatment.data'
     # ignored_columns = [0]

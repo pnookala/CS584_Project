@@ -1,6 +1,7 @@
 import sys, getopt, ntpath, os
 import numpy as np
 import math
+import re
 
 dataType = np.float64
 
@@ -31,19 +32,30 @@ def read_and_parse(filepath, class_column=None, ignored_columns=None, header=Fal
     data = np.ndarray((N, M), dtype=dataType)
     output = np.ndarray((N, 1), dtype=class_type)
 
+    valueDictionary = {'?': math.nan, "b'y'":1, "b'n'":-1}
+    v_max = 2
+
     i = 0
     for d in content:
         k = 0
         for j in data_columns:
-            try:
-                if str(d[j]) == "b'y'":
-                    v = 1
-                elif str(d[j]) == "b'n'":
-                    v = 0
-                else:
+            if len(content.dtype) > 0:
+                dt = content.dtype[j]
+            else:
+                dt = content.dtype
+
+            print(str(dt))
+            if re.match('\|S[0-9]+', str(dt)):
+                v = valueDictionary.get(str(d[j]))
+                if v is None:
+                    valueDictionary[str(d[j])] = v = v_max
+                    v_max += 1
+
+            else:
+                try:
                     v = float(d[j])
-            except ValueError:
-                v = math.nan
+                except ValueError:
+                    v = math.nan
             data[i, k] = v
             k += 1
         output[i] = d[class_column]
