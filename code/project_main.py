@@ -8,6 +8,7 @@ from knnAlgorithm import *
 from pylab import *
 from numpy import *
 from sklearn.preprocessing import Imputer
+from sklearn.cross_validation import KFold
 
 # debug = True
 debug = False
@@ -33,8 +34,8 @@ def main(argv):
     # impute_data = False
     # use_sign = False
 
-    # filePath = 'data/iris.data'
-    # class_column = None
+    filePath = 'data/iris.data'
+    class_column = None
 
     # filePath = 'data/hepatitis.data'
     # class_column = 0
@@ -53,8 +54,8 @@ def main(argv):
     # ignored_columns = [0]
     # class_column = None
 
-    # row_random_rate = [.7]
-    # col_random_rate = [2]
+    row_random_rate = [.7]
+    col_random_rate = [2]
     # row_random_rate = np.arange(0, 1.0001, 0.1)
     # col_random_rate = np.arange(0, 8, 1)
     # r_seed = 0
@@ -234,6 +235,8 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
         fileName = ntpath.basename(filePath)
         plot_save_meanvalues(fileName, meanChangeInValues)
 
+    kFoldValidation(_data, classes, class_indices, parameters)
+
 
 def plot_save_meanvalues(fileName, meanChangeInValues):
     # Plot mean change in values
@@ -299,6 +302,40 @@ def perform_classification_with_mean_imputation(data, classes, class_indices, pa
 
     # myshow(estimates, "estimates")
     analyze_errors(conf_mat, classes, parameters, statistics, row_random_rate, col_random_rate)
+
+
+def kFoldValidation(_data, classes, class_indices, parameters):
+    print("Starting 10 fold cross validaton...")
+    perfmetrics = list()
+    kf = KFold(len(_data),10)
+    for train_indices, test_indices in kf:
+        xtrain = _data[train_indices]
+        xtest = _data[test_indices]
+        class_indices_train = class_indices[train_indices]
+        class_indices_test = class_indices[test_indices]
+
+        clf = svm.SVC()
+        clf.fit(xtrain, class_indices_train)
+        print(clf._get_coef())
+
+        # rows are actual, columns are predicted
+        conf_mat = np.zeros((len(class_indices_test), len(class_indices_test)), dtype=np.int64)
+        estimates = np.zeros(class_indices_test.shape, dtype=class_indices_test.dtype)
+        for i in range(len(class_indices_test)):
+            estimates[i] = clf.predict(np.reshape(xtest[i, :], (1, -1)))
+            conf_mat[estimates[i], class_indices_test[i]] += 1
+
+        accuracy, recall, precision, f_measure = CalculateStatistics(conf_mat)
+
+        number_format = '{:8.3%}'
+        print("Accuracy:  " + number_format.format(accuracy))
+        print("Precision: " + number_format.format(precision))
+        print("Recall:    " + number_format.format(recall))
+        print("F-Measure: " + number_format.format(f_measure))
+
+        perfmetrics.append([accuracy, recall, precision, f_measure])
+
+    print("Average metrics from 10-Fold cross validation (Accuracy, Recall, Precision, Fmeasure) : ", np.mean(perfmetrics, axis=0))
 
 
 def analyze_errors(conf_mat, classes, parameters, statistics, row_random_rate, col_random_rate):
