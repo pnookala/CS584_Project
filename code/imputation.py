@@ -117,7 +117,7 @@ class Imputation:
 
         # Stop here if we're doing a baseline score
         if not impute_data:
-            return data
+            return data, []
 
         n_classes = len(np.unique(output))
         imputedData, meanChangeInValues = knnImputation(data, missing_indices, sorted_indices, impact_weight, n_classes)
