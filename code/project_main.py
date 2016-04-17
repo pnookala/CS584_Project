@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from myUtil import *
 from imputation import *
 from sklearn import svm
 import itertools
@@ -17,15 +16,25 @@ outputDir = 'output'
 
 def main(argv):
     #### Setup ####
+    # Default options
     ignored_columns = None
-    # impute_data = True
-    impute_data = True
-    # Use ordering of imputed values
-    use_sign = False
-
-    # Default options for debugging, use the command-line parameters to override
-    filePath = 'data/iris.data'
     class_column = None
+    impute_data = True
+    use_sign = True  # Use ordering of imputed values
+    filePath = None
+    delimiter = ','
+    has_header = False
+
+    row_random_rate = [0]
+    col_random_rate = [0]
+    r_seed = None
+
+    # Override defaults for debugging, use the command-line parameters otherwise
+    # impute_data = False
+    # use_sign = False
+
+    # filePath = 'data/iris.data'
+    # class_column = None
 
     # filePath = 'data/hepatitis.data'
     # class_column = 0
@@ -44,29 +53,27 @@ def main(argv):
     # ignored_columns = [0]
     # class_column = None
 
-    delimiter = ','
-    has_header = False
-    row_random_rate = [.7]
-    col_random_rate = [2]
-    # row_random_rate = [0]
-    # col_random_rate = [0]
+    # row_random_rate = [.7]
+    # col_random_rate = [2]
     # row_random_rate = np.arange(0, 1.0001, 0.1)
     # col_random_rate = np.arange(0, 8, 1)
-    r_seed = 0
+    # r_seed = 0
 
     def get_help(argv):
-        print(argv[
-                  0] + ' -i <input_file> [-l <class label column>] [-s] [-r <row_rand>] [-c <col_rand>] [--seed] [-I] [--skip-columns]')
+        print(argv[0] + ' -i <input_file> [-l <class label column>] [-s] [-r <row_rand>] ' +
+              '[-c <col_rand>] [--seed] [-I] [--skip-columns] [--no-sort]')
         print('    -l  -    The column containing the class label. Defaults to the last column [0-<# columns>]')
         print('    -s  -    skips the first line of files that have a header')
         print('    -r  -    Parameter for clearing data, the rate at which rows should be zeroed [0-1]')
         print('    -c  -    Parameter for clearing data, the number of columns to potentially clear [1-<#features>]')
         print("    -I  -    Don't impute values. Useful for getting the baseline accuracy of the classifier")
-        print('    --seed - The random seed to use in clearing the data')
+        print('    --seed - The random seed to use in clearing the data [Numeric]')
         print('    --skip-columns - Specify which columns should be ignored during the classification step (0-indexed)')
+        print('    --no-sort - Tells the imputation algorithm to impute on the unordered set of missing values')
         print()
         print('Both the -r and -c parameters will accept a triplet of values specifying a range (as [start,end,step])')
         print('for the given parameter. The resultant range must still lie within the arguments\' bounds')
+        print('The --skip-columns parameter accepts a comma-delimited set of columns')
 
     def parse_range_arg(arg, dtype):
         if ',' in arg:
@@ -97,7 +104,8 @@ def main(argv):
             return res
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hsi:r:c:l:I", ["help", "ifile=", "skip-first", "seed=", "skip-columns="])
+        opts, args = getopt.getopt(argv[1:], "hsi:r:c:l:I",
+                                   ["help", "ifile=", "skip-first", "seed=", "skip-columns=", "--no-sort"])
     except getopt.GetoptError:
         get_help(argv);
         sys.exit(2)
@@ -119,7 +127,7 @@ def main(argv):
         elif opt in ("-s", "--skip-first"):
             has_header = True
             if debug:
-                print("Has header: " + has_header)
+                print("Has header: " + str(has_header))
 
         elif opt in ("-r"):
             row_random_rate = parse_range_arg(arg, np.float)
@@ -148,15 +156,19 @@ def main(argv):
             if debug:
                 print("Skipping columns: " + str(ignored_columns))
 
+        elif opt in ("--no-sort"):
+            use_sign = False
+            if debug:
+                print("Impute w Sort: " + str(use_sign))
+
+    if filePath is None:
+        get_help(argv)
+        sys.exit(2)
+
     #### Environment Setup ####
     fileName = ntpath.basename(filePath)
-    # outputFileBase = get_name_without_ext(fileName)
-    # outputFileName = outputDir + '/' + outputFileBase + '_output'
-    # if not os.path.exists(outputDir):
-    #     os.makedirs(outputDir)
-
-
-
+    if not os.path.exists(outputDir):
+        os.makedirs(outputDir)
 
     #### Read/Parse Data ####
     print()
@@ -206,7 +218,8 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
     #     myshow(class_indices, "class_indices")
 
     print("With Mean Imputation : ")
-    perform_classification_with_mean_imputation(_data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate)
+    perform_classification_with_mean_imputation(_data, classes, class_indices, parameters, statistics, row_random_rate,
+                                                col_random_rate)
 
     processor = Imputation();
     print("With Knn Imputation : ")
@@ -266,7 +279,8 @@ def perform_classification(data, classes, class_indices, parameters, statistics,
     analyze_errors(conf_mat, classes, parameters, statistics, row_random_rate, col_random_rate)
 
 
-def perform_classification_with_mean_imputation(data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate):
+def perform_classification_with_mean_imputation(data, classes, class_indices, parameters, statistics, row_random_rate,
+                                                col_random_rate):
     imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
     imp.fit(data)
     Imputer(axis=0, copy=True, missing_values='NaN', strategy='mean', verbose=0)
