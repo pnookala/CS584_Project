@@ -59,7 +59,7 @@ class Imputation:
         self.alpha = 1
         ''
 
-    def estimate_values(self, data, output, impute_data):
+    def estimate_values(self, data, output, impute_data, use_sign):
         # First find parameters
         M, N = data.shape
         instance_rate = np.zeros((M), dtype=self.dtype)  # 1/R_i
@@ -102,7 +102,12 @@ class Imputation:
             data[i, j] = average[j]  # Impute the average values as a first-pass guess
 
         # Then find the order to impute the data
-        sorted_indices = np.argsort(significance)
+        if use_sign:
+            sorted_indices = np.argsort(significance)
+        else:
+            sorted_indices = []
+            for count in range(len(significance)):
+                sorted_indices.append(count)
 
         if debug:
             myshow(average, "Average")
