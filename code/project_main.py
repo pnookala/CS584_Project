@@ -45,8 +45,12 @@ def main(argv):
     # class_column = 1
     # ignored_columns = [0, 10]
 
-    filePath = 'data/house-votes-84.data'
-    class_column = 0
+    # filePath = 'data/house-votes-84.data'
+    # class_column = 0
+
+    # filePath = 'data/bridges.data.version1.data'
+    # class_column = 9
+    # ignored_columns = [0,2]
 
     # filePath = 'data/water-treatment.data'
     # ignored_columns = [0]

@@ -6,6 +6,7 @@ import re
 dataType = np.float64
 
 
+# This process can also substitute '0' for missing values in the case of a y/n class. See valueDictionary below
 def read_and_parse(filepath, class_column=None, ignored_columns=None, header=False, delimiter=','):
     content = np.genfromtxt(filepath, dtype=None, delimiter=delimiter, skip_header=header)
 
@@ -32,34 +33,36 @@ def read_and_parse(filepath, class_column=None, ignored_columns=None, header=Fal
     data = np.ndarray((N, M), dtype=dataType)
     output = np.ndarray((N, 1), dtype=class_type)
 
-    valueDictionary = {'?': math.nan, "b'y'":1, "b'n'":-1}
-    v_max = 2
+    col_data = 0
+    for col in data_columns:
+        valueDictionary = {"b'?'": math.nan, "b'y'": 1, "b'n'": -1}
+        v_max = 2
+        for row in range(len(content)):
+            d = content[row]
 
-    i = 0
-    for d in content:
-        k = 0
-        for j in data_columns:
             if len(content.dtype) > 0:
-                dt = content.dtype[j]
+                dt = content.dtype[col]
             else:
                 dt = content.dtype
 
-            print(str(dt))
+            # print(str(dt))
             if re.match('\|S[0-9]+', str(dt)):
-                v = valueDictionary.get(str(d[j]))
+                v = valueDictionary.get(str(d[col]))
                 if v is None:
-                    valueDictionary[str(d[j])] = v = v_max
+                    valueDictionary[str(d[col])] = v = v_max
                     v_max += 1
 
             else:
                 try:
-                    v = float(d[j])
+                    v = float(d[col])
                 except ValueError:
                     v = math.nan
-            data[i, k] = v
-            k += 1
-        output[i] = d[class_column]
-        i += 1
+            data[row, col_data] = v
+        col_data += 1
+
+    for row in range(len(content)):
+        d = content[row]
+        output[row] = d[class_column]
 
     classes = np.unique(output)
     class_indices = np.argwhere(output == classes)[:, 1]  # Create indices to the "classes" array for each row
