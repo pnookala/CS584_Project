@@ -9,6 +9,7 @@ from pylab import *
 from numpy import *
 from sklearn.preprocessing import Imputer
 from sklearn.cross_validation import KFold
+from sklearn.metrics import mean_squared_error
 
 # debug = True
 debug = False
@@ -34,7 +35,9 @@ def main(argv):
     # impute_data = False
     # use_sign = False
 
-    # filePath = 'data/iris.data'
+    filePath = 'data/iris.data'
+    row_random_rate = [0.5]
+    col_random_rate = [2]
 
     # filePath = 'data/hepatitis.data'
     # class_column = 0
@@ -234,7 +237,7 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
     fileName = ntpath.basename(filePath)
     plot_save_meanvalues(fileName, meanChangeInValues)
 
-    kFoldValidation(_data, classes, class_indices, parameters)
+    kFoldValidation(_data, class_indices, parameters)
 
 
 def plot_save_meanvalues(fileName, meanChangeInValues):
@@ -303,7 +306,7 @@ def perform_classification_with_mean_imputation(data, classes, class_indices, pa
     analyze_errors(conf_mat, classes, parameters, statistics, row_random_rate, col_random_rate)
 
 
-def kFoldValidation(_data, classes, class_indices, parameters):
+def kFoldValidation(_data, class_indices, parameters):
     print("Starting 10 fold cross validaton...")
     perfmetrics = list()
     kf = KFold(len(_data),10)
@@ -325,16 +328,31 @@ def kFoldValidation(_data, classes, class_indices, parameters):
             conf_mat[estimates[i], class_indices_test[i]] += 1
 
         accuracy, recall, precision, f_measure = CalculateStatistics(conf_mat)
+        mse = mean_squared_error(class_indices_test, estimates)
 
         number_format = '{:8.3%}'
         print("Accuracy:  " + number_format.format(accuracy))
         print("Precision: " + number_format.format(precision))
         print("Recall:    " + number_format.format(recall))
         print("F-Measure: " + number_format.format(f_measure))
+        print("Mean squared error : ", mse)
 
-        perfmetrics.append([accuracy, recall, precision, f_measure])
+        perfmetrics.append([accuracy, recall, precision, f_measure, mse ])
 
-    print("Average metrics from 10-Fold cross validation (Accuracy, Recall, Precision, Fmeasure) : ", np.mean(perfmetrics, axis=0))
+        # Save cross validation results to a file.
+        output_path = os.path.join(outputDir, "validationresults.csv")
+        new_file = not os.path.exists(output_path)
+
+        headers = ("Accuracy", "Precision", "Recall", "F-Measure", "Mean Squared Error")
+        with open(output_path, 'a') as f:
+            if new_file:
+                f.write(','.join(itertools.chain(parameters[0], headers)))
+                f.write('\n')
+            f.write(','.join(str(x) for x in itertools.chain(parameters[1], (accuracy, precision, recall, f_measure, mse))))
+            f.write('\n')
+            f.flush()
+
+    print("Average metrics from 10-Fold cross validation (Accuracy, Recall, Precision, Fmeasure, Mean Squared Error) : ", np.mean(perfmetrics, axis=0))
 
 
 def analyze_errors(conf_mat, classes, parameters, statistics, row_random_rate, col_random_rate):
