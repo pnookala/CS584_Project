@@ -20,7 +20,7 @@ def main(argv):
     # Default options
     ignored_columns = None
     class_column = None
-    impute_data = True
+    # impute_data = True
     use_sign = True  # Use ordering of imputed values
     filePath = None
     delimiter = ','
@@ -34,8 +34,7 @@ def main(argv):
     # impute_data = False
     # use_sign = False
 
-    filePath = 'data/iris.data'
-    class_column = None
+    # filePath = 'data/iris.data'
 
     # filePath = 'data/hepatitis.data'
     # class_column = 0
@@ -50,15 +49,14 @@ def main(argv):
     # filePath = 'data/house-votes-84.data'
     # class_column = 0
 
+    # filePath = 'data/bridges.data.version1.data'
+    # class_column = 9
+    # ignored_columns = [0,2]
+
     # filePath = 'data/water-treatment.data'
     # ignored_columns = [0]
     # class_column = None
 
-    row_random_rate = [.7]
-    col_random_rate = [2]
-    # row_random_rate = np.arange(0, 1.0001, 0.1)
-    # col_random_rate = np.arange(0, 8, 1)
-    # r_seed = 0
 
     def get_help(argv):
         print(argv[0] + ' -i <input_file> [-l <class label column>] [-s] [-r <row_rand>] ' +
@@ -147,10 +145,10 @@ def main(argv):
             if debug:
                 print("seed: " + str(arg))
 
-        elif opt in ("-I"):
-            impute_data = False
-            if debug:
-                print("Impute: " + str(impute_data))
+        # elif opt in ("-I"):
+        #     impute_data = False
+        #     if debug:
+        #         print("Impute: " + str(impute_data))
 
         elif opt in ("--skip-columns"):
             ignored_columns = parse_seq_arg(arg, int)
@@ -192,20 +190,17 @@ def main(argv):
     #### Process data ####
     for rrand in row_random_rate:
         for crand in col_random_rate:
-            process_data(data, output, class_indices, classes, filePath, float(rrand), int(crand), impute_data, r_seed,
-                         statistics, use_sign)
+            process_data(data, output, class_indices, classes, filePath, float(rrand), int(crand), r_seed, statistics,
+                         use_sign)
 
     print_statistics_plot(statistics, fileName)
 
     print("Done, exiting")
 
 
-def process_data(data_source, _output, class_indices, classes, filePath, row_random_rate, col_random_rate, impute_data,
-                 r_seed,
+def process_data(data_source, _output, class_indices, classes, filePath, row_random_rate, col_random_rate, r_seed,
                  statistics, use_sign):
     manually_zero = row_random_rate > 0
-    parameters = [["Input File", "Zero Data", "Row Random Rate", "Col Random Rate", "Rand Seed", "Impute"],
-                  [filePath, manually_zero, row_random_rate, col_random_rate, r_seed, impute_data]]
 
     _data = data_source.copy()
 
@@ -219,21 +214,25 @@ def process_data(data_source, _output, class_indices, classes, filePath, row_ran
     #     myshow(class_indices, "class_indices")
 
     print("With Mean Imputation : ")
+    parameters = [["Input File", "Zero Data", "Row Random Rate", "Col Random Rate", "Rand Seed", "Iter_Impute"],
+                  [filePath, manually_zero, row_random_rate, col_random_rate, r_seed, False]]
     perform_classification_with_mean_imputation(_data, classes, class_indices, parameters, statistics, row_random_rate,
                                                 col_random_rate)
 
     processor = Imputation();
     print("With Knn Imputation : ")
-    _data, meanChangeInValues = processor.estimate_values(_data, class_indices, impute_data, use_sign)
+    parameters = [["Input File", "Zero Data", "Row Random Rate", "Col Random Rate", "Rand Seed", "Iter_Impute"],
+                  [filePath, manually_zero, row_random_rate, col_random_rate, r_seed, True]]
+    _data, meanChangeInValues = processor.estimate_values(_data, class_indices, True, use_sign)
 
     # myshow(data, "imputed data", maxlines=15)
     # myshow(data - old_data, "difference", maxlines=15)
 
     perform_classification(_data, classes, class_indices, parameters, statistics, row_random_rate, col_random_rate)
 
-    if impute_data:
-        fileName = ntpath.basename(filePath)
-        plot_save_meanvalues(fileName, meanChangeInValues)
+    # if impute_data:
+    fileName = ntpath.basename(filePath)
+    plot_save_meanvalues(fileName, meanChangeInValues)
 
     kFoldValidation(_data, classes, class_indices, parameters)
 

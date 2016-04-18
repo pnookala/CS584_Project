@@ -58,9 +58,7 @@ def knnImputation(originalData, missing_indices, sorted_indices, impact_weight, 
                 #     imputedData[CMIV_i[0], CMIV_i[1]]
                 # ))
                 changeinValues += abs(data[CMIV_i[0], CMIV_i[1]] - imputedData[CMIV_i[0], CMIV_i[1]])
-                print('', end='', flush=True)
 
-            # print(imputedData)
             meanChange = changeinValues / len(missing_indices)
             print("Mean change in filled in values : ", meanChange)
 
