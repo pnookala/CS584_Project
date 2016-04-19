@@ -1,0 +1,45 @@
+/* Authors: Karl Stough, Poornima Nookala */
+
+This document contains instructions about how to run the program.
+
+Requirements: 
+	Python 3.5
+	Python Libraries:
+		matplotlib
+		numpy
+		scipy
+		sklearn
+
+There is a help menu which displays information about what the program can accept. Here are the details of command line options available to run the program.
+
+project_main.py -i <input_file> [-l <class label column>] [-s] [-r <row_rand>] [-c <col_rand>] [--seed] [--skip-columns] [--no-sort]
+    -l  -    The column containing the class label. Defaults to the last column [0-<# columns>]
+    -s  -    skips the first line of files that have a header
+    -r  -    Parameter for clearing data, the rate at which rows should be zeroed [0-1]
+    -c  -    Parameter for clearing data, the number of columns to potentially clear [1-<#features>]
+    --seed - The random seed to use in clearing the data [Numeric]
+    --skip-columns - Specify which columns should be ignored during the classification step (0-indexed)
+    --no-sort - Tells the imputation algorithm to impute on the unordered set of missing values
+
+Both the -r and -c parameters will accept a triplet of values specifying a range (as [start,end,step])
+for the given parameter. The resultant range must still lie within the arguments' bounds
+The --skip-columns parameter accepts a comma-delimited set of columns
+
+Program can handle numerical as well as categorical features. Any new datasets should be copied to 'data' folder to run the program.
+The 'results' folder contains results from experiments performed by the team.
+
+==============================================================================================================================================================
+
+Steps to run the program
+-------------------------
+
+1. Navigate to project/code folder from terminal.
+2. runtests.sh contains all the commands to run the program for 7 different datasets which are included in the data folder.
+3. From terminal, execute 'sh runtests.sh'.
+4. All the results and plots of the program will be saved in 'output' folder.
+
+==============================================================================================================================================================
+
+
+
+
