@@ -10,5 +10,8 @@ python project_main.py -i data/house-votes-84.data -l 0
 
 python project_main.py -i data/bridges.data.version1.data -l 9 --skip-columns=0,2
 
+python project_main.py -i data/water-treatment.data --skip-columns=0
+
+python project_main.py -i data/hepatitis.data -l 0
 
 python project_main.py -i data/iris.data -r 0,1.01,0.1 -c 0,8,1 --seed=0

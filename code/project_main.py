@@ -4,6 +4,7 @@ from imputation import *
 from sklearn import svm
 import itertools
 import re
+import getopt
 from knnAlgorithm import *
 from pylab import *
 from numpy import *
@@ -35,9 +36,9 @@ def main(argv):
     # impute_data = False
     # use_sign = False
 
-    filePath = 'data/iris.data'
-    row_random_rate = [0.5]
-    col_random_rate = [2]
+    # filePath = 'data/iris.data'
+    # row_random_rate = [0.5]
+    # col_random_rate = [2]
 
     # filePath = 'data/hepatitis.data'
     # class_column = 0
@@ -63,12 +64,12 @@ def main(argv):
 
     def get_help(argv):
         print(argv[0] + ' -i <input_file> [-l <class label column>] [-s] [-r <row_rand>] ' +
-              '[-c <col_rand>] [--seed] [-I] [--skip-columns] [--no-sort]')
+              '[-c <col_rand>] [--seed] [--skip-columns] [--no-sort]')
         print('    -l  -    The column containing the class label. Defaults to the last column [0-<# columns>]')
         print('    -s  -    skips the first line of files that have a header')
         print('    -r  -    Parameter for clearing data, the rate at which rows should be zeroed [0-1]')
         print('    -c  -    Parameter for clearing data, the number of columns to potentially clear [1-<#features>]')
-        print("    -I  -    Don't impute values. Useful for getting the baseline accuracy of the classifier")
+        # print("    -I  -    Don't impute values. Useful for getting the baseline accuracy of the classifier")
         print('    --seed - The random seed to use in clearing the data [Numeric]')
         print('    --skip-columns - Specify which columns should be ignored during the classification step (0-indexed)')
         print('    --no-sort - Tells the imputation algorithm to impute on the unordered set of missing values')
@@ -106,7 +107,7 @@ def main(argv):
             return res
 
     try:
-        opts, args = getopt.getopt(argv[1:], "hsi:r:c:l:I",
+        opts, args = getopt.getopt(argv[1:], "hsi:r:c:l:",
                                    ["help", "ifile=", "skip-first", "seed=", "skip-columns=", "--no-sort"])
     except getopt.GetoptError:
         get_help(argv);
