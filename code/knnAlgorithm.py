@@ -1,13 +1,3 @@
-import sys, getopt, ntpath, os
-import math
-import sklearn.preprocessing as skp
-from sklearn import linear_model
-from sklearn.neighbors import KNeighborsRegressor
-import pandas as pd
-import pylab as pl
-from sklearn.neighbors import KNeighborsClassifier
-from scipy.spatial import distance
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn import neighbors, datasets
